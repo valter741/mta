@@ -41,7 +41,6 @@ const Home = () => {
     return(
         <SafeAreaView style={styles.sectionContainer}>
             <ScrollView>
-                <Task name="123" objective="object" completion="50"/>
                 {isLoaded ? pageJson.items.map(item => <Task name={item.name} objective={item.objective} completion={item.completion}/>)  : <Text>Loading...</Text>}
             </ScrollView>
         </SafeAreaView>
