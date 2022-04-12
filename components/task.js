@@ -13,7 +13,7 @@ import {
 const Task = props => {
 
     return(
-        <View style={styles.section1}>
+        <Pressable style={styles.section1}>
             <Text>
                 {props.name}
             </Text>
@@ -23,7 +23,7 @@ const Task = props => {
             <Text>
                 {props.completion}
             </Text>
-        </View>
+        </Pressable>
     )
 }
 
