@@ -31,6 +31,7 @@ const Home = () => {
     }
 
 
+    
     useEffect(() => {
         if(!isLoaded){
             getTasks('http://192.168.0.171:8000/bckend/tasks/view');
