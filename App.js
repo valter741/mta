@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type {Node} from 'react';
 import {
   SafeAreaView,
@@ -13,12 +13,10 @@ import {
 } from 'react-native';
 
 
-
-
-
 import Home from './screens/home';
 import Noti from './screens/noti';
 import Profile from './screens/profile';
+import AppContext from './components/AppContext';
 
 
 import { createStackNavigator } from '@react-navigation/stack';
@@ -34,41 +32,55 @@ const Tab = createBottomTabNavigator();
 
 const App: () => Node = () => {
 
+  const [Login, setLogin] = useState(0);
+
+  const setIdToLogin = (id) => {
+    setLogin(id);
+  };
+
+  const userSettings = {
+    thisLogin: Login,
+    setLogin,
+    setIdToLogin,
+  };
+
   return (
-    <NavigationContainer>
-      <Tab.Navigator initialRouteName='Home' screenOptions={{
-        tabBarStyle:{
-          height: 75,
-          paddingTop: 6,
-          paddingBottom: 12,
-          backgroundColor: '#1c1c1c',
-        },
-        headerShown: false,
-        tabBarActiveTintColor: 'orange',
-        tabBarInactiveTintColor: 'white',
-        tabBarActiveBackgroundColor: '#1c1c1c',
-        tabBarInactiveBackgroundColor: '#1c1c1c',
-        tabBarLabelStyle: {
-          fontSize: 12,
-        },
-      }}>
-        <Tab.Screen name="Profile" component={Profile} options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account" color={color} size={size} />
-          ),
-        }}/>
-        <Tab.Screen name="Home" component={Home} options={{  
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" color={color} size={size} />
-          ),
-        }}/>
-        <Tab.Screen name="Noti" component={Noti} options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="bell" color={color} size={size} />
-          ),
-        }}/>
-      </Tab.Navigator>
-    </NavigationContainer>  
+    <AppContext.Provider value={userSettings}>
+      <NavigationContainer>
+        <Tab.Navigator initialRouteName='Home' screenOptions={{
+          tabBarStyle:{
+            height: 75,
+            paddingTop: 6,
+            paddingBottom: 12,
+            backgroundColor: '#1c1c1c',
+          },
+          headerShown: false,
+          tabBarActiveTintColor: 'orange',
+          tabBarInactiveTintColor: 'white',
+          tabBarActiveBackgroundColor: '#1c1c1c',
+          tabBarInactiveBackgroundColor: '#1c1c1c',
+          tabBarLabelStyle: {
+            fontSize: 12,
+          },
+        }}>
+          <Tab.Screen name="Profile" component={Profile} options={{
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="account" color={color} size={size} />
+            ),
+          }}/>
+          <Tab.Screen name="Home" component={Home} options={{  
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="home" color={color} size={size} />
+            ),
+          }}/>
+          <Tab.Screen name="Noti" component={Noti} options={{
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="bell" color={color} size={size} />
+            ),
+          }}/>
+        </Tab.Navigator>
+      </NavigationContainer>
+    </AppContext.Provider> 
   );
 };
 
