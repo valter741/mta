@@ -16,6 +16,7 @@ import {
 import Home from './screens/home';
 import Noti from './screens/noti';
 import Profile from './screens/profile';
+import Contacts from './screens/contacts';
 import AppContext from './components/AppContext';
 
 
@@ -33,6 +34,7 @@ const Tab = createBottomTabNavigator();
 const App: () => Node = () => {
 
   const [Login, setLogin] = useState(0);
+  const [token, setToken] = useState("");
 
   const setIdToLogin = (id) => {
     setLogin(id);
@@ -41,7 +43,8 @@ const App: () => Node = () => {
   const userSettings = {
     thisLogin: Login,
     setLogin,
-    setIdToLogin,
+    thisToken: token,
+    setToken,
   };
 
   return (
@@ -71,6 +74,11 @@ const App: () => Node = () => {
           <Tab.Screen name="Home" component={Home} options={{  
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="home" color={color} size={size} />
+            ),
+          }}/>
+          <Tab.Screen name="Contacts" component={Contacts} options={{
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="bell" color={color} size={size} />
             ),
           }}/>
           <Tab.Screen name="Noti" component={Noti} options={{
