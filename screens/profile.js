@@ -26,7 +26,8 @@ const Profile = () => {
     const [password2, setPassword2] = useState("Password");
     const [fullname, setFullname] = useState("Cele Meno");
     const [pageJson, setPageJson] = useState({});
-    const [upImage, setUpImage] = useState({});
+    const [upImage, setUpImage] = useState("none");
+    const [upName, setUpName] = useState("Meno")
 
     const doLogin = async () => {
         if(login1 == "Login" || password1 == "Password"){
@@ -72,12 +73,41 @@ const Profile = () => {
             })
             .then(function(response) {
                 console.log(response.status)
-                if (response.status == 404) {
-                    Alert.alert("zle meno alebo heslo");
-                }else if(response.status == 409){
-                    Alert.alert("login uz existuje");
+                if (response.status == 400) {
+                    Alert.alert("zly request");
                 }else if(response.status == 200){
                     Alert.alert("Registracia Uspesna, mozete sa prihlasit");
+                }else if(response.status == 409){
+                    Alert.alert("login uz existuje");
+                }else{
+                    throw Error(response.status);
+                }
+                return response;
+            }).catch(error => {Alert.alert("chyba serverom skuste znovu"); console.log(error)})            
+        }
+    }
+
+    const updateProfile = async () => {
+        if(upImage == "none" || upName == "Meno"){
+            Alert.alert("Zadajte Meno a vberte aj obrazok");
+        }else{
+            const form = new FormData();
+            form.append('image', upImage);
+            form.append('full_name', upName);
+            console.log(form);
+            await fetch("http://" + global.ip + "/bckend/profile/update/" + myContext.thisLogin, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'multipart/form-data; ',
+                },
+                body: form
+            })
+            .then(function(response) {
+                console.log(response.status)
+                if (response.status == 404) {
+                    Alert.alert("zle meno alebo heslo");
+                }else if(response.status == 200){
+                    doLogin();
                 }else{
                     throw Error(response.status);
                 }
@@ -90,7 +120,7 @@ const Profile = () => {
         const res = await DocumentPicker.pick({
             type: [DocumentPicker.types.allFiles],
         });
-        this.setState({ singleFile: res });
+        setUpImage(res);
     }
 
     return(
@@ -151,9 +181,17 @@ const Profile = () => {
                         
                         <TextInput
                             style={styles.input}
-                            onChangeText={newText => setPassword2(newText)}
-                            defaultValue={password2}
+                            onChangeText={newText => setUpName(newText)}
+                            defaultValue={upName}
                         />
+                        <Pressable style={styles.inputButton} android_ripple={{color:'grey'}} onPress={() => uploadImage()}>
+                            {upImage == "none" ? <Text>Vyber Obrazok</Text> : <Text>Obrazok Vybraty</Text>}                           
+                        </Pressable>
+                        <Pressable style={styles.inputButton} android_ripple={{color:'grey'}} onPress={() => updateProfile()}>
+                            <Text>
+                                Update profilu
+                            </Text>
+                        </Pressable>
                         <Pressable style={styles.inputButton} android_ripple={{color:'grey'}} onPress={() => myContext.setLogin(0)}>
                             <Text>
                                 Logout
