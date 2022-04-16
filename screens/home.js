@@ -12,6 +12,7 @@ import {
   } from 'react-native';
 
 import Task from '../components/task.js'
+import '../components/global.js'
 
 
 
@@ -30,18 +31,19 @@ const Home = () => {
                 throw Error(response.statusText);
             }
             return response;
-        }).then(response => response.json())   
+        }).catch(error => {setReload(true); console.log(error)})
+        .then(response => response.json())   
         .then(data => {
             console.log(data);
             setPageJson(data);
             setReload(false);
             setIsLoaded(true);
-        }).catch(error => setReload(true))
+        })
     }
     
     useEffect(() => {
         if(!isLoaded){
-            getTasks('http://192.168.99.26:8000/bckend/tasks/view');
+            getTasks('http://' + global.ip + '0/bckend/tasks/view');
         }
         
         console.log("asdasd");
@@ -52,7 +54,7 @@ const Home = () => {
             <ScrollView>
                 {isLoaded ? pageJson.items.map((item) => <Task name={item.name} objective={item.objective} completion={item.completion}/>)  : <Text>Loading...</Text>}
                 {reload ? 
-                    <Pressable style={styles.inputButton} android_ripple={{color:'grey'}} onPress={() => getTasks('http://192.168.99.246:8000/bckend/tasks/view')}>
+                    <Pressable style={styles.inputButton} android_ripple={{color:'grey'}} onPress={() => getTasks('http://' + global.ip + '/bckend/tasks/view')}>
                         <Text>
                             Reload
                         </Text>
