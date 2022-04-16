@@ -14,8 +14,8 @@ import {
   } from 'react-native';
 
 import AppContext from '../components/AppContext';
-import '../components/global.js'
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import '../components/global.js';
+import DocumentPicker from 'react-native-document-picker'
 
 const Profile = () => {
 
@@ -26,18 +26,19 @@ const Profile = () => {
     const [password2, setPassword2] = useState("Password");
     const [fullname, setFullname] = useState("Cele Meno");
     const [pageJson, setPageJson] = useState({});
+    const [upImage, setUpImage] = useState({});
 
     const doLogin = async () => {
         if(login1 == "Login" || password1 == "Password"){
-            Alert.alert(global.ip);
+            Alert.alert("Zadajte aj Login aj Password");
         }else{
             await fetch("http://" + global.ip + "/bckend/login/?login=" + login1 + "&password=" + password1)
             .then(function(response) {
                 console.log(response.status)
                 if (response.status == 404) {
-                    Alert.alert("zle meno alebo heslo")
+                    Alert.alert("zle meno alebo heslo");
                 }else if(response.status == 200){
-                    Alert.alert("Prihlaseny")
+
                 }else{
                     throw Error(response.status);
                 }
@@ -52,17 +53,50 @@ const Profile = () => {
             })
             
         }
-        
+    }
 
+    const doRegister = async () => {
+        if(login2 == "Login" || password2 == "Password" || fullname == "Cele Meno"){
+            Alert.alert("Zadajte aj Login aj Password aj meno");
+        }else{
+            await fetch("http://" + global.ip + "/bckend/register/", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "login": login2,
+                    "password": password2,
+                    "full_name": fullname
+                })
+            })
+            .then(function(response) {
+                console.log(response.status)
+                if (response.status == 404) {
+                    Alert.alert("zle meno alebo heslo");
+                }else if(response.status == 409){
+                    Alert.alert("login uz existuje");
+                }else if(response.status == 200){
+                    Alert.alert("Registracia Uspesna, mozete sa prihlasit");
+                }else{
+                    throw Error(response.status);
+                }
+                return response;
+            }).catch(error => {Alert.alert("chyba serverom skuste znovu"); console.log(error)})            
+        }
+    }
 
-
+    const uploadImage = async () => {
+        const res = await DocumentPicker.pick({
+            type: [DocumentPicker.types.allFiles],
+        });
+        this.setState({ singleFile: res });
     }
 
     return(
         <SafeAreaView style={styles.sectionContainer}>
             {myContext.thisLogin == 0 ? 
                 <ScrollView>
-                    <View style={{height: 75}}></View>
                     <TextInput
                         style={styles.input}
                         onChangeText={newText => setLogin1(newText)}
@@ -94,7 +128,7 @@ const Profile = () => {
                         onChangeText={newText => setFullname(newText)}
                         defaultValue={fullname}
                     />
-                    <Pressable style={styles.inputButton} android_ripple={{color:'grey'}} onPress={() => doLogin()}>
+                    <Pressable style={styles.inputButton} android_ripple={{color:'grey'}} onPress={() => doRegister()}>
                         <Text>
                             Register
                         </Text>
@@ -106,7 +140,7 @@ const Profile = () => {
                         <Image
                             style={{height:150, width: 150}}
                             source={{
-                            uri: 'http://192.168.137.159:8000/bckend/pictures/Captureeeeeeeeeeeeeeeeeeeeeeeeeee_eHpezhV.png',
+                            uri: 'http://' + global.ip + '/bckend' + pageJson.pic,
                             }}
                         />
                         <Text style={styles.sectionDescription}>ID: {pageJson.user.id}</Text>
@@ -114,16 +148,17 @@ const Profile = () => {
                         <Text style={styles.sectionDescription}>Meno: {pageJson.user.full_name}</Text>                 
                     </View>
                     <View style={{marginTop: 50}}>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={newText => setLogin2(newText)}
-                            defaultValue={login2}
-                        />
+                        
                         <TextInput
                             style={styles.input}
                             onChangeText={newText => setPassword2(newText)}
                             defaultValue={password2}
                         />
+                        <Pressable style={styles.inputButton} android_ripple={{color:'grey'}} onPress={() => myContext.setLogin(0)}>
+                            <Text>
+                                Logout
+                            </Text>
+                        </Pressable>
                     </View>
                 </ScrollView>
                 }
