@@ -74,6 +74,65 @@ const Contacts = () => {
 
     }
 
+    const addContact = async () => {
+        if(newContact == "ID Noveho kontaktu"){
+            Alert.alert("Zadajte id kontaktu");
+        }else if(isNaN(newContact)){
+            Alert.alert("Zadajte iba numericke id");
+        }else{
+            await fetch("http://" + global.ip + "/bckend/contacts/add", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "userid": myContext.thisLogin,
+                    "contactid" : parseInt(newContact),
+                    "token": myContext.thisToken
+                })
+            })
+            .then(function(response) {
+                console.log(response.status)
+                if (response.status == 400) {
+                    Alert.alert("zly request");
+                }else if(response.status == 200){
+                    setIsLoaded(false);
+                    setLoadStarted(true);
+                    loadContacts();
+                }else{
+                    throw Error(response.status);
+                }
+                return response;
+            }).catch(error => {Alert.alert("chyba serverom skuste znovu"); console.log(error)})            
+        }
+    }
+
+    const sendMessage = async () => {
+        await fetch("http://" + global.ip + "/bckend/msg/create", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "senderid": myContext.thisLogin,
+                "targetid": messageOpen,
+                "content": newMessage,
+                "token": myContext.thisToken
+            })
+        })
+        .then(function(response) {
+            console.log(response.status)
+            if (response.status == 400) {
+                Alert.alert("zly request");
+            }else if(response.status == 200){
+                contactPressed(messageOpen);
+            }else{
+                throw Error(response.status);
+            }
+            return response;
+        }).catch(error => {Alert.alert("chyba serverom skuste znovu"); console.log(error)})
+    }
+
     useEffect(() => {
         if(!isFocused && isLoaded){
             setIsLoaded(false);
@@ -111,7 +170,7 @@ const Contacts = () => {
                 {isLoaded ?
                     <View style={{flex:1}}>
                         {messageOpen == 0 ?
-                            <View style={{flex: 1,}}>
+                            <View style={{flex: 1}}>
                                 <ScrollView style={{flex:1}}>
                                     {pageJson.items.map((item) => 
                                         <Pressable style={styles.section1} android_ripple={{color:'grey'}} onPress={() => contactPressed(item.contactid)}>
@@ -127,32 +186,43 @@ const Contacts = () => {
                                         defaultValue={newContact}
                                         keyboardType='numeric'
                                     />
-                                    <Pressable style={styles.section3} android_ripple={{color:'grey'}}>
+                                    <Pressable style={styles.section3} android_ripple={{color:'grey'}} onPress={() => addContact()}>
                                         <Text>Pridaj</Text>
                                     </Pressable>
                                 </View> 
                             </View>:
-                            <ScrollView>
-                                {messages.items.map((item) => 
-                                    <View>
-                                        {item.senderid == myContext.thisLogin ?
-                                            <View style={styles.section2}>
-                                                <Text>Vy: {item.content}</Text>
-                                            </View>:
-                                            <View style={styles.section1}>
-                                                <Text>{item.content}</Text>
-                                            </View>
-                                        }
-                                    </View>
-                                )}
-                            </ScrollView>
+                            <View style={{flex:1}}>
+                                <ScrollView style={{flex:1}}>
+                                    {messages.items.map((item) => 
+                                        <View>
+                                            {item.senderid == myContext.thisLogin ?
+                                                <View style={styles.section2}>
+                                                    <Text>Vy: {item.content}</Text>
+                                                </View>:
+                                                <View style={styles.section1}>
+                                                    <Text>{item.content}</Text>
+                                                </View>
+                                            }
+                                        </View>
+                                    )}
+                                </ScrollView>
+                                <View style={{flex:0.1, flexDirection: 'row'}}>
+                                    <TextInput
+                                        style={[styles.input, {flex:1}]}
+                                        onChangeText={newText => setNewMessage(newText)}
+                                        defaultValue={newMessage}
+                                    />
+                                    <Pressable style={styles.section3} android_ripple={{color:'grey'}} onPress={() => sendMessage()}>
+                                        <Text>Poslat</Text>
+                                    </Pressable>
+                                </View>
+                            </View>                      
                         }
                     </View> :
                     <Text>Loading..</Text>
                 }
             </View>
-        }
-            
+        } 
         </SafeAreaView>
     );
 }
