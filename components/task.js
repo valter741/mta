@@ -1,5 +1,6 @@
-import React from 'react';
-
+import React, { useState } from 'react';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Dialog from 'react-native-dialog';
 import {
     SafeAreaView,
     ScrollView,
@@ -36,26 +37,44 @@ const Task = (props) => {
       );  
     }
   }*/
+
+  const [visibleEditTaskDialog, setVisibleEditTaskDialog] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState();
+
+  const showEditTaskDialog = () => {setVisibleEditTaskDialog(true);};
+  const cancelEditTaskDialog = () => {setVisibleEditTaskDialog(false);};
+
   return (
+
     <View style={styles.item}>
+      <Dialog.Container visible={visibleEditTaskDialog}>
+          <Dialog.Title>Úprava úlohy</Dialog.Title>
+          <Dialog.Input placeholder={'Notification Message'} value={notificationMessage} onChangeText={text => setNotificationMessage(text)}></Dialog.Input>
+          
+          <Dialog.Button label="Zrušiť" onPress={cancelEditTaskDialog} />
+          <Dialog.Button label="Uložiť" onPress={cancelEditTaskDialog} />
+      </Dialog.Container>
       <View style={props.completion == 0 ? styles.completion0 : 
                     props.completion == 50 ? styles.completion50 : styles.completion100}></View>
-      <View styles={styles.info}> 
-        <View>
+      <View style={styles.taskInfo}>
+        <View style={styles.taskHeader}>
           <Text style={styles.title}>{props.name}</Text>
+          <View style={styles.fromTo}>
+            <Text style={{fontSize: 10}}>Od: {props.userID}</Text>
+            <Text style={{fontSize: 10}}>Pre: {props.targetID}</Text>
+          </View>
+        </View> 
+        <View style={styles.objective}><Text>{props.objective}</Text></View>
+        <View style={styles.editView}>
+          <Pressable
+            style={styles.editButton}
+            onPress={showEditTaskDialog}
+          >
+            {/*<Text style={{fontSize: 25, fontWeight: '500'}}>{'>'}</Text>*/}
+            <MaterialCommunityIcons name="square-edit-outline" color={'darkgrey'} size={20}/>
+          </Pressable>
         </View>
-        <View>
-          <Text>Od: {props.userID}</Text>
-        </View>
-        <View>
-          <Text>Pre: {props.targetID}</Text>
-        </View>
-        <View>
-          <Text>{props.objective}</Text>
-        </View>
-        <View>
-          <Text>{props.completion}</Text>
-        </View>
+        {/*<Text>{props.completion}</Text>*/}
       </View>
     </View>
     /*<Pressable style={styles.section1}>
@@ -86,25 +105,56 @@ const styles = StyleSheet.create({
       //padding: 2,
       borderRadius: 10,
       flexDirection: 'row',
-      alignItems: 'center',
-      //justifyContent: 'space-between',
-      marginBottom: 20,
+      //alignItems: 'center',
+      justifyContent: 'flex-start',
+      marginBottom: 15,
+      elevation: 3,
     },
-    info: {
-      padding: 15,
+    taskInfo: {
+      padding: 5,
       flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      //justifyContent: 'space-between',
     },
     title: {
       fontSize: 20,
       fontWeight: '700',
     },
-    target: {
-
+    taskHeader: {
+      //width: 'auto',
+      flexDirection: 'row',
+      //flexWrap: 'wrap',
+      alignItems: 'stretch',
+      //justifyContent: 'space-between',
+      //backgroundColor: 'red',
+      //paddingRight: 20,
+    },
+    fromTo: {
+      //width: '100%',
+      position: 'absolute',
+      left: 225,
+      flexWrap: 'nowrap',
+      //justifyContent: 'center',
+      //paddingLeft: 30,
+      alignItems: 'flex-start',
     },
     objective: {
-
+      //backgroundColor: 'red',
+      flexWrap: 'nowrap',
+      width: 'auto',
+      alignItems:'stretch',
+    },
+    editView: {
+      //backgroundColor: 'red',
+      position: 'relative',
+      //top: 0,
+      left: 275,
+      //flexDirection: 'row',
+      //justifyContent: 'flex-end',
+      //width: 'auto',
+    },
+    editButton: {
+      
     },
     completion0: {
       width: 25,
@@ -112,7 +162,7 @@ const styles = StyleSheet.create({
       backgroundColor: '#FF0000',
       opacity: 0.5,
       borderRadius: 10,
-      marginRight: 15,
+      marginRight: 10,
     },
     completion50: {
       width: 25,
@@ -120,7 +170,7 @@ const styles = StyleSheet.create({
       backgroundColor: '#FFAA00',
       opacity: 0.5,
       borderRadius: 10,
-      marginRight: 15,
+      marginRight: 10,
     },
     completion100: {
       width: 25,
@@ -128,7 +178,7 @@ const styles = StyleSheet.create({
       backgroundColor: '#00FF00',
       opacity: 0.5,
       borderRadius: 10,
-      marginRight: 15,
+      marginRight: 10,
     },
   });
 
