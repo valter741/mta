@@ -15,8 +15,7 @@ import {
   } from 'react-native';
 
 import AppContext from '../components/AppContext';
-import { useFocusEffect } from '@react-navigation/native';
-import { VERTICAL } from 'react-native/Libraries/Components/ScrollView/ScrollViewContext';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 
 const Contacts = () => {
@@ -31,12 +30,16 @@ const Contacts = () => {
     const [newMessage, setNewMessage] = useState("New Message");
     const [newContact, setNewContact] = useState("ID Noveho kontaktu");
 
+    const isFocused = useIsFocused();
+
     const loadContacts = async () => {
         await fetch("http://" + global.ip + "/bckend/contacts/view?userid=" + myContext.thisLogin + "&token=" + myContext.thisToken)
         .then(function(response) {
             console.log(response.status)
             if(response.status == 200){
 
+            }else if(response.status == 404){
+                
             }else{
                 throw Error(response.status);
             }
@@ -72,9 +75,11 @@ const Contacts = () => {
     }
 
     useEffect(() => {
-       
-
-    }, []);
+        if(!isFocused && isLoaded){
+            setIsLoaded(false);
+            setMessageOpen(0);
+        }
+    }, [isFocused]);
     
     useFocusEffect(() => {
         const backAction = () => {
