@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-//import CheckBox from '@react-native-community/checkbox';
+import CheckBox from '@react-native-community/checkbox';
 import {
     Alert,
     SafeAreaView,
@@ -30,10 +30,11 @@ const Home = () => {
     const [taskTargetId, setTaskTargetId] = useState();
     const [taskName, setTaskName] = useState();
     const [taskObjective, setTaskObjective] = useState();
-    const [taskCompletion, setTaskCompletion] = useState();
+    //const [taskCompletion, setTaskCompletion] = useState();
     
     const showFilterDialog = () => {setVisibleFilterDialog(true);};
     const cancelFilterDialog = () => {setVisibleFilterDialog(false);};
+    const applyFilter = () => {cancelFilterDialog(); getTasks("http://" + global.ip + "/bckend/tasks/view");}
     const showAddTaskDialog = () => {setVisibleAddTaskDialog(true);};
     const cancelAddTaskDialog = () => {setVisibleAddTaskDialog(false);};
 
@@ -43,6 +44,15 @@ const Home = () => {
     const [checkboxGreenTasks, setCheckboxGreenTasks] = useState(false);
     const [checkboxOrangeTasks, setCheckboxOrangeTasks] = useState(false);
     const [checkboxRedTasks, setCheckboxRedTasks] = useState(false);
+
+    const onlyCheckboxAllTasks = (newValue) => {
+      setCheckboxAllTasks(newValue);
+      setCheckboxForMeTasks(false);
+      setCheckboxFromMeTasks(false);
+      setCheckboxGreenTasks(false);
+      setCheckboxOrangeTasks(false);
+      setCheckboxRedTasks(false);
+    };
 
     const getTasks = async (url) => {
         if (!checkboxAllTasks) {
@@ -85,7 +95,7 @@ const Home = () => {
     }
     
     const postTask = async () => {
-        console.log(taskUserId, typeof taskTargetId, taskName, taskObjective, taskCompletion);
+        console.log(taskUserId, typeof taskTargetId, taskName, taskObjective);
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -101,7 +111,7 @@ const Home = () => {
         .then(function(response) {
           console.log(response.status)
           if (response.status == 400) {
-            Alert.alert("400 BAD REQUEST\nVyplnte vsetky polia.");
+            Alert.alert("400 BAD REQUEST\nVyplňte všetky polia.");
           } else if (response.status == 200) {
             cancelAddTaskDialog();
             setTaskTargetId(null);
@@ -112,7 +122,7 @@ const Home = () => {
             throw Error(response.status);
           }
           return response;
-        }).catch(error => {Alert.alert("Chyba servera. Skuste znovu."); console.log(error)})
+        }).catch(error => {Alert.alert("Chyba servera. Skúste znovu."); console.log(error)})
         .then(response => response.json())   
         .then(data => {
             console.log(data);
@@ -132,19 +142,36 @@ const Home = () => {
       <SafeAreaView style={styles.sectionContainer}>
         <Dialog.Container visible={visibleFilterDialog}>
           <Dialog.Title>Filtrovanie</Dialog.Title>
-          {/*<CheckBox value={checkboxForMeTasks} onValueChange={(newValue) => setCheckboxForMeTasks(newValue)}/>*/}
-          <Text>Všetky úlohy</Text>
-          <Text>Úlohy pre mňa</Text>
-          <Text>Úlohy odo mňa</Text>
-          <Text>Nezačaté úlohy</Text>
-          <Text>Prebiehajúce úlohy</Text>
-          <Text>Dokončené úlohy</Text>
+          <View style={{flexDirection: 'row'}}>
+            <CheckBox value={checkboxAllTasks} onValueChange={(newValue) => onlyCheckboxAllTasks(newValue)}/>
+            <Text style={{alignSelf: 'center'}}>Všetky úlohy</Text>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <CheckBox value={checkboxForMeTasks} onValueChange={(newValue) => {setCheckboxForMeTasks(newValue); setCheckboxAllTasks(false)}}/>
+            <Text style={{alignSelf: 'center'}}>Úlohy pre mňa</Text>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <CheckBox value={checkboxFromMeTasks} onValueChange={(newValue) => {setCheckboxFromMeTasks(newValue); setCheckboxAllTasks(false)}}/>
+            <Text style={{alignSelf: 'center'}}>Úlohy odo mňa</Text>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <CheckBox value={checkboxRedTasks} onValueChange={(newValue) => {setCheckboxRedTasks(newValue); setCheckboxAllTasks(false)}}/>
+            <Text style={{alignSelf: 'center'}}>Nezačaté úlohy</Text>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <CheckBox value={checkboxOrangeTasks} onValueChange={(newValue) => {setCheckboxOrangeTasks(newValue); setCheckboxAllTasks(false)}}/>
+            <Text style={{alignSelf: 'center'}}>Prebiehajúce úlohy</Text>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <CheckBox value={checkboxGreenTasks} onValueChange={(newValue) => {setCheckboxGreenTasks(newValue); setCheckboxAllTasks(false)}}/>
+            <Text style={{alignSelf: 'center'}}>Dokončené úlohy</Text>
+          </View>
           <Dialog.Button label="Zrušiť" onPress={cancelFilterDialog} />
-          <Dialog.Button label="Filtrovať" onPress={cancelFilterDialog} />
+          <Dialog.Button label="Filtrovať" onPress={applyFilter} />
         </Dialog.Container>
         <Dialog.Container visible={visibleAddTaskDialog}>
           <Dialog.Title>Pridať úlohu</Dialog.Title>
-          <Dialog.Input placeholder={'Target ID'} value={taskTargetId} onChangeText={text => setTaskTargetId(text)}></Dialog.Input>
+          <Dialog.Input placeholder={'Target User ID'} value={taskTargetId} onChangeText={text => setTaskTargetId(text)}></Dialog.Input>
           <Dialog.Input placeholder={'Task Name'} value={taskName} onChangeText={text => setTaskName(text)}></Dialog.Input>
           <Dialog.Input placeholder={'Task Objective'} value={taskObjective} onChangeText={text => setTaskObjective(text)}></Dialog.Input>
           <Dialog.Button label="Zrušiť" onPress={cancelAddTaskDialog} />
@@ -157,7 +184,7 @@ const Home = () => {
               ? taskItems.items.map((item, index) => {
                   return (
                     <View key={index}>
-                      <Task userID={item.userid} targetID={item.targetid} name={item.name} objective={item.objective} completion={item.completion}/>
+                      <Task id={item.id} userID={item.userid} targetID={item.targetid} name={item.name} objective={item.objective} completion={item.completion}/>
                     </View>
                   )
                 }) 
