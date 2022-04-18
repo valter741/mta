@@ -4,9 +4,6 @@ import Dialog from 'react-native-dialog';
 import RadioGroup from 'react-native-radio-buttons-group';
 import {
     Alert,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
     StyleSheet,
     Text,
     View,
@@ -34,7 +31,7 @@ const Task = (props) => {
   }];
 
   const [visibleEditTaskDialog, setVisibleEditTaskDialog] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState();
+  const [notificationMessage, setNotificationMessage] = useState(null);
   const [radioButtons, setRadioButtons] = useState(radioButtonsData);
   const [fromUser, setFromUser] = useState();
   const [toUser, setToUser] = useState();
@@ -50,6 +47,45 @@ const Task = (props) => {
     else if (radioButtons[1].selected == true) return 50;
     else if (radioButtons[2].selected == true) return 100;
   };
+  const updateTask = () => {
+    if (notificationMessage == null) {
+      Alert.alert("400 BAD REQUEST\nVyplňte správu notifikácie.");
+    } else if (getSelectedCompletion() == props.completion) {
+      Alert.alert("400 BAD REQUEST\nNezmenili ste stav úlohy.");
+    } else {
+      putTask();
+      postNotification();
+      cancelEditTaskDialog();
+    }
+  };
+  const postNotification = async () => {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            "userid": props.userID,
+            "targetid": props.targetID,
+            "taskid": props.id,
+            "content": notificationMessage,
+        })
+    };
+    await fetch("http://" + global.ip + "/bckend/noti/create", requestOptions)
+    .then(function(response) {
+      //console.log(response.status)
+      if (response.status == 400) {
+        Alert.alert("[postNotification]\n400 BAD REQUEST");
+      } else if (response.status == 200) {
+        setNotificationMessage(null);
+      } else {
+        throw Error(response.status);
+      }
+      return response;
+    }).catch(error => {Alert.alert("Chyba servera. Skúste znovu."); console.log(error)})
+    .then(response => response.json())   
+    .then(data => {
+        console.log(data);
+    })
+  };
   const putTask = async () => {
     const requestOptions = {
         method: 'PUT',
@@ -60,7 +96,7 @@ const Task = (props) => {
     .then(function(response) {
       console.log(response.status);
       if (response.status == 400) {
-        Alert.alert("400 BAD REQUEST");
+        Alert.alert("[putTask]\n400 BAD REQUEST");
       } else if (response.status == 200) {
         //getTasks("http://" + global.ip + "/bckend/tasks/view");
       } else {
@@ -86,7 +122,7 @@ const Task = (props) => {
           <Dialog.Input placeholder={'Notification Message'} value={notificationMessage} onChangeText={text => setNotificationMessage(text)}></Dialog.Input>
           <RadioGroup containerStyle={styles.radioGroup} radioButtons={radioButtons} onPress={onPressRadioButton} />
           <Dialog.Button label="Zrušiť" onPress={cancelEditTaskDialog} />
-          <Dialog.Button label="Uložiť" onPress={putTask} />
+          <Dialog.Button label="Uložiť" onPress={updateTask} />
       </Dialog.Container>
       <View style={props.completion == 0 ? styles.completion0 : 
                     props.completion == 50 ? styles.completion50 : styles.completion100}></View>
@@ -95,8 +131,8 @@ const Task = (props) => {
           <Text style={styles.title}>{props.name}</Text>
           <Text style={styles.taskId}>#{props.id}</Text>
           <View style={styles.fromTo}>
-            <Text style={{fontSize: 10}}>Od: {props.userID}</Text>
-            <Text style={{fontSize: 10}}>Pre: {props.targetID}</Text>
+            <Text style={{fontSize: 10}}>Od: {props.userFullName}</Text>
+            <Text style={{fontSize: 10}}>Pre: {props.targetFullName}</Text>
           </View>
         </View> 
         <View style={styles.objective}><Text>{props.objective}</Text></View>
@@ -169,8 +205,8 @@ const styles = StyleSheet.create({
     fromTo: {
       //width: '100%',
       position: 'absolute',
-      left: 225,
-      flexWrap: 'nowrap',
+      left: 175,
+      //flexWrap: 'nowrap',
       //justifyContent: 'center',
       //paddingLeft: 30,
       alignItems: 'flex-start',

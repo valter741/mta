@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
 import CheckBox from '@react-native-community/checkbox';
 import {
     Alert,
     SafeAreaView,
     ScrollView,
-    StatusBar,
     StyleSheet,
     Pressable,
     Text,
     View,
-    KeyboardAvoidingView,
   } from 'react-native';
 
 import Task from '../components/task.js'
@@ -127,7 +124,7 @@ const Home = () => {
         .then(data => {
             console.log(data);
         })
-    }
+    };
 
     useEffect(() => {
         if(!isLoaded){
@@ -181,7 +178,16 @@ const Home = () => {
               ? taskItems.items.map((item, index) => {
                   return (
                     <View key={index}>
-                      <Task id={item.id} userID={item.userid} targetID={item.targetid} name={item.name} objective={item.objective} completion={item.completion}/>
+                      <Task 
+                        id={item.id} 
+                        userID={item.userid} 
+                        userFullName={item.userFullName} 
+                        targetID={item.targetid} 
+                        targetFullName={item.targetFullName} 
+                        name={item.name} 
+                        objective={item.objective} 
+                        completion={item.completion}
+                      />
                     </View>
                   )
                 }) 
@@ -194,7 +200,7 @@ const Home = () => {
                   android_ripple={{color:'grey'}} 
                   onPress={() => getTasks("http://" + global.ip + "/bckend/tasks/view")}
                 >
-                  <Text> Reload </Text>
+                  <Text style={{fontSize: 18}}> Reload </Text>
                 </Pressable> 
               : <Text></Text>
           }
@@ -204,7 +210,6 @@ const Home = () => {
             <Pressable
               style={styles.addTaskButton} 
               android_ripple={{color:'darkgrey', borderless: true}} 
-              //onPress={() => postTask('http://' + global.ip + '/bckend/tasks/create')}
               onPress={showAddTaskDialog}
             >
               <Text style={styles.plusText}>+ Pridať úlohu</Text>
@@ -214,7 +219,6 @@ const Home = () => {
             <Pressable
               style={styles.filterButton} 
               android_ripple={{color:'darkgrey', borderless: true}} 
-              //onPress={() => postTask('http://' + global.ip + '/bckend/tasks/create')}
               onPress={showFilterDialog}
             >
               <MaterialCommunityIcons name="filter" color={'grey'} size={30}/>
