@@ -111,9 +111,6 @@ const Task = (props) => {
         {/*<Text>{props.completion}</Text>*/}
       </View>
     </View>
-    /*<Pressable style={styles.section1}>
-
-    </Pressable>*/
     )
 }
 

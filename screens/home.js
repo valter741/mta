@@ -126,9 +126,6 @@ const Home = () => {
         .then(response => response.json())   
         .then(data => {
             console.log(data);
-            //setTaskItems(data);
-            //setReload(false);
-            //setIsLoaded(false);
         })
     }
 
@@ -224,13 +221,6 @@ const Home = () => {
             </Pressable>
           </View>
         </View>
-        
-        
-        {/* 
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.addTask}
-        ></KeyboardAvoidingView>*/}
       </SafeAreaView>
     );
 }

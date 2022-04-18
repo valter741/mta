@@ -24,6 +24,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you\'re using an old API with gesture components, check out new Gestures system!",
@@ -66,22 +67,22 @@ const App: () => Node = () => {
             fontSize: 12,
           },
         }}>
-          <Tab.Screen name="Profile" component={Profile} options={{
+          <Tab.Screen name="Profil" component={Profile} options={{
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="account" color={color} size={size} />
             ),
           }}/>
-          <Tab.Screen name="Home" component={Home} options={{  
+          <Tab.Screen name="Domov" component={Home} options={{  
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="home" color={color} size={size} />
             ),
           }}/>
-          <Tab.Screen name="Contacts" component={Contacts} options={{
+          <Tab.Screen name="Kontakty" component={Contacts} options={{
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="bell" color={color} size={size} />
+              <AntDesign name="contacts" color={color} size={size} />
             ),
           }}/>
-          <Tab.Screen name="Noti" component={Noti} options={{
+          <Tab.Screen name="Notif." component={Noti} options={{
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="bell" color={color} size={size} />
             ),
