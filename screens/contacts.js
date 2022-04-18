@@ -16,6 +16,7 @@ import {
 
 import AppContext from '../components/AppContext';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
 const Contacts = () => {
@@ -133,6 +134,21 @@ const Contacts = () => {
         }).catch(error => {Alert.alert("chyba serverom skuste znovu"); console.log(error)})
     }
 
+    const deleteMessage = async (id) => {
+        await fetch("http://" + global.ip + "/bckend/msg/delete/" + id)
+        .then(function(response) {
+            console.log(response.status)
+            if (response.status == 400) {
+                Alert.alert("zly request");
+            }else if(response.status == 200){
+                contactPressed(messageOpen);
+            }else{
+                throw Error(response.status);
+            }
+            return response;
+        }).catch(error => {Alert.alert("chyba serverom skuste znovu"); console.log(error)})
+    }
+
     useEffect(() => {
         if(!isFocused && isLoaded){
             setIsLoaded(false);
@@ -196,8 +212,13 @@ const Contacts = () => {
                                     {messages.items.map((item) => 
                                         <View>
                                             {item.senderid == myContext.thisLogin ?
-                                                <View style={styles.section2}>
-                                                    <Text>Vy: {item.content}</Text>
+                                                <View style={{flex:1, flexDirection: 'row'}}>
+                                                    <View style={styles.section2}>
+                                                        <Text style={{flex:1}}>Vy: {item.content}</Text>
+                                                    </View>
+                                                    <Pressable style={[styles.section1, {flex:0.05}]}  android_ripple={{color:'grey'}} onPress={() => deleteMessage(item.id)}>
+                                                        <MaterialCommunityIcons  name="trash-can" color={'white'} size={18}/>
+                                                    </Pressable>
                                                 </View>:
                                                 <View style={styles.section1}>
                                                     <Text>{item.content}</Text>
